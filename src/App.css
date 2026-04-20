@@ -28,10 +28,57 @@
   color: #61dafb;
 }
 
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.uniconButon {
+  transition: all 0.4s !important;
+}
+
+.iconButon {
+  transition: all 0.4s !important;
+}
+
+.iconButon:hover {
+  background-color: rgb(204, 195, 195) !important;
+  box-shadow: 0px 7px 7px rgba(0, 0, 0, 0.4);
+}
+
+.task {
+  transition: all 0.4s !important;
+}
+
+.task:hover {
+  padding-bottom: 20px;
+  padding-top: 20px;
+  box-shadow: 0px 7px 7px rgba(0, 0, 0, 0.4);
+}
+
+@font-face {
+  font-family: morga;
+  src: url("/public/Fonts/Mogra-Regular.ttf")
+}
+
+@font-face {
+  font-family: bjcree;
+  src: url("/public/Fonts/BJ_Cree/BJCree-Medium.ttf");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: bjcree;
+  src: url("/public/Fonts/BJ_Cree/BJCree-Regular.ttf");
+  font-weight: 200;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
