@@ -22,25 +22,28 @@
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-export default function ColorToggleButton() {
-  const [alignment, setAlignment] = React.useState('web');
+export default function ColorToggleButton({handleShownclick, shwedTasks}) {
+  
 
-  const handleChange = (event, newAlignment) => {
-    setAlignment(newAlignment);
-  };
+  
+
+  function handleClick(e) {
+    // console.log('eeeeee', e.target.value)
+    handleShownclick(e.target.value)
+  }
 
   return (
     <ToggleButtonGroup
       color="primary"
       size='small'
-      value={alignment}
+      value={shwedTasks}
       exclusive
-      onChange={handleChange}
+      // onChange={handleChange}
       aria-label="Platform"
     >
-      <ToggleButton value="web">ALL</ToggleButton>
-      <ToggleButton value="android">DONE</ToggleButton>
-      <ToggleButton value="ios">PROGRESS</ToggleButton>
+      <ToggleButton value="all" onClick={(e)=>handleClick(e)} >ALL</ToggleButton>
+      <ToggleButton value="done" onClick={(e)=>handleClick(e)}>DONE</ToggleButton>
+      <ToggleButton value="progress" onClick={(e)=>handleClick(e)}>PROGRESS</ToggleButton>
     </ToggleButtonGroup>
   );
 }

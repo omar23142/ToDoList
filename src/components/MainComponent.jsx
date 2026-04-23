@@ -19,16 +19,37 @@ export default function MainComponent() {
   let tasksArray = useContext(tasksContext);
   // console.log('ggggggggggggg',tasksArray);
   const [tasks, setTasks] = useState(tasksArray);
-const [input, setInput] = useState('');
+  const [input, setInput] = useState('');
+  const [shwedTasks, setShowedTasks] = React.useState('all');
 
-let tasksList = tasks.map((task)=>{
+  function handleShownclick(value){
+    console.log('shownclick from parent', value)
+    setShowedTasks(value);
+  }
+
+let completedTasks = tasks.filter((task) =>{
+  return task.isCompleted;
+});
+let unCompletedTasks = tasks.filter((task)=>{
+  return !task.isCompleted;
+})
+// console.log('commmpleteddd', completedTasks);
+
+let showedTasks = tasks;
+if(shwedTasks === 'done')
+  showedTasks = completedTasks;
+else if(shwedTasks === 'progress')
+  showedTasks = unCompletedTasks;
+
+let tasksList = showedTasks.map((task)=>{
   return (
-   <TaskCard key={task.id} title={task.title} detailes={task.detailes}
+  <TaskCard key={task.id} title={task.title} detailes={task.detailes}
     task={task} handleCompletedCheck={handleCompletedCheck} 
     handleDeleteClick={handleDeleteClick}
     handleTaskEdit={handleTaskEdit}/>
   )
 });
+
 
 function handleAddClick (e) {
   const newTask = {id:crypto.randomUUID(), title:input, detailes:'', isCompleted:false }
@@ -53,6 +74,7 @@ function handleCompletedCheck(id) {
   });
 
   setTasks( newTasks);
+  localStorage.setItem("tasks", JSON.stringify(newTasks));
   if(sound === true){
     // console.log('soundddddddd')
     const audio = new Audio(completedSound);
@@ -66,6 +88,7 @@ function handleDeleteClick(id) {
     return task.id !== id 
   });
   setTasks(newTasks);
+  localStorage.setItem("tasks", JSON.stringify(newTasks));
 }
 
 function handleTaskEdit(id,  newTitle='', newDetaile='') {
@@ -76,6 +99,7 @@ function handleTaskEdit(id,  newTitle='', newDetaile='') {
     return task;
   });
   setTasks(newTasks);
+  localStorage.setItem("tasks", JSON.stringify(newTasks));
   console.log('hhhhhhhhh', newTasks)
 }
 
@@ -87,7 +111,7 @@ const card = (
       </h2>
       <hr />
       {/* <BasicButtonGroup style={{size:'small'}}/> */}
-      <ColorToggleButton size='xs'/>
+      <ColorToggleButton handleShownclick={handleShownclick} shwedTasks={shwedTasks} size='xs'/>
       {/* <TaskCard /> */}
       {tasksList}
     </CardContent>
@@ -104,6 +128,7 @@ const card = (
    <Button variant="contained" 
    style={{width:'90%', height:'100%', marginRight:'12px'}}
    onClick={(e)=>{handleAddClick(e)}}
+    disabled={input.length <= 0 ? true: false}
    >ADD</Button>
   </Grid>
     
@@ -121,12 +146,17 @@ const card = (
 
   React.useEffect(()=> {
     console.log('callling useEffect')
-  }, [])
+    let localstorage = JSON.parse(localStorage.getItem('tasks'));
+    if (!localstorage)
+      localstorage=[];
+    console.log('llllllllll', localstorage);
+    setTasks(localstorage)  
+  }, []);
 
   
   return (
     <Box sx={{ minWidth: 275 }}>
-      <Card variant="outlined" style={{marginTop:'100px'}}>{card}</Card>
+      <Card variant="outlined" style={{background:'', maxHeight:'80vh', overflow:'scroll', marginTop:'100px'}}>{card}</Card>
     </Box>
   );
 }
