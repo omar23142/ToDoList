@@ -11,9 +11,20 @@ import ColorToggleButton from './ButtonGroup';
 import TaskCard from './TaskCard'
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
-import {useState, useContext} from 'react';
+import {useState, useContext, useMemo} from 'react';
 import completedSound from './checked.mp3';
 import { tasksContext } from '../context/tasksContext';
+// import completedSound from './checked.mp3';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import OfflinePinIcon from '@mui/icons-material/OfflinePin';
+import { useTheme } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import {barContext} from '../context/snackbarContext'
+
 
 export default function MainComponent() {
   let tasksArray = useContext(tasksContext);
@@ -22,17 +33,65 @@ export default function MainComponent() {
   const [input, setInput] = useState('');
   const [shwedTasks, setShowedTasks] = React.useState('all');
 
+  const [Deleteopen, setdeleteOpen] = React.useState(false);
+
+  const handleDeleteClickOpen = (task) => {
+    setTaskfromTaskCard(task);
+    setdeleteOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setdeleteOpen(false);
+  };
+
+  const handleDeleteAgree = () => {
+    console.log('in handleDeleteAgree',taskfromTaskCard)
+    handleDeleteClick(taskfromTaskCard.id)
+    setdeleteOpen(false);
+    handleEvent('task was deleted successfully')
+  };
+
+  const [taskfromTaskCard, setTaskfromTaskCard] = useState({});
+  const [EditForm, setEditForm] = React.useState({EditOpenForm:false, title:taskfromTaskCard.title, detailes:taskfromTaskCard.detailes});
+  // console.log('barc', barContext)
+  const  {handleEvent} = useContext(barContext)
+  // console.log('Arraaaaaaaaaaay', handleEvent);
+  //////////////////////////////////////////////////////////
+    function handleEditOpen(task) {
+      console.log('tasssssskkkkk',task.id, task.title, task.detailes)
+      setTaskfromTaskCard(task)
+      setEditForm({EditOpenForm:true, title:task.title, detailes:task.detailes});
+    }
+    function handleEditClose() {
+      setEditForm({...EditForm, EditOpenForm:false});
+    }
+    function handleSubmit(event) {
+      event.preventDefault();
+      handleTaskEdit(taskfromTaskCard.id, EditForm.title, EditForm.detailes)
+      setEditForm({...EditForm, EditOpenForm:false});
+      handleEvent('task was edited successfully')
+    }
+
+
+
   function handleShownclick(value){
     console.log('shownclick from parent', value)
     setShowedTasks(value);
   }
 
-let completedTasks = tasks.filter((task) =>{
+let completedTasks = useMemo(()=>{
+  return tasks.filter((task) =>{
+  // console.log('in the completedTasks for loopppppppppppppppppp')
   return task.isCompleted;
 });
-let unCompletedTasks = tasks.filter((task)=>{
+},[tasks])
+
+let unCompletedTasks = useMemo(()=>{
+  return tasks.filter((task)=>{
+  //  console.log('in the NOT completedTasks for loopppppppppppppppppp')
   return !task.isCompleted;
 })
+},[tasks]);
 // console.log('commmpleteddd', completedTasks);
 
 let showedTasks = tasks;
@@ -46,7 +105,10 @@ let tasksList = showedTasks.map((task)=>{
   <TaskCard key={task.id} title={task.title} detailes={task.detailes}
     task={task} handleCompletedCheck={handleCompletedCheck} 
     handleDeleteClick={handleDeleteClick}
-    handleTaskEdit={handleTaskEdit}/>
+    handleTaskEdit={handleTaskEdit}
+    handleEditOpen={handleEditOpen}
+    handleDeleteClickOpen={handleDeleteClickOpen}/>
+    
   )
 });
 
@@ -58,15 +120,19 @@ function handleAddClick (e) {
   setTasks(newtasks);
   localStorage.setItem("tasks", JSON.stringify(newtasks));
   setInput('')
+  handleEvent('task was added successfully')
 }
 function handleCompletedCheck(id) {
   let sound= false;
+  let message='task was un Cehecked successfully';
   console.log('hhhhhh', id)
   let newTasks = tasks.map((task)=> {
     if(task.id === id)
     {
       if(!task.isCompleted)
-        sound=true;
+        {sound=true;
+         message= 'task was cehecked successfully'
+        }
      return {...task, isCompleted:!task.isCompleted}
      
     }
@@ -74,6 +140,8 @@ function handleCompletedCheck(id) {
   });
 
   setTasks( newTasks);
+
+  handleEvent(message)
   localStorage.setItem("tasks", JSON.stringify(newTasks));
   if(sound === true){
     // console.log('soundddddddd')
@@ -149,14 +217,88 @@ const card = (
     let localstorage = JSON.parse(localStorage.getItem('tasks'));
     if (!localstorage)
       localstorage=[];
-    console.log('llllllllll', localstorage);
+    // console.log('llllllllll', localstorage);
     setTasks(localstorage)  
   }, []);
 
   
   return (
+    <>
+    
+    {/* EDITMODAL */}
+    <Dialog open={EditForm.EditOpenForm} onClose={handleEditClose}>
+        <DialogTitle>Subscribe</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            To Edit this Task Pleas inter the new Title and new Detailes
+          </DialogContentText>
+          <form onSubmit={handleSubmit} id="subscription-form" >
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="name"
+              name="title"
+              label="NEW TITLE"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={EditForm.title}
+              onChange={(e)=>{setEditForm({...EditForm, title:e.target.value})}}
+            />
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="name"
+              name="detailes"
+              label="NEW DETAILES"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={EditForm.detailes}
+              onChange={(e)=>{setEditForm({...EditForm, detailes:e.target.value})}}
+            />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditClose}>Cancel</Button>
+          <Button type="submit" form="subscription-form" onSubmit={handleSubmit}>
+            EDIT
+          </Button>
+        </DialogActions>
+      </Dialog>
+    {/* ====EDITMODAL ====*/}
+
+    {/* deleteModal */}
+      <Dialog
+        open={Deleteopen}
+        onClose={handleDeleteClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        role="alertdialog"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Deleting Confirm"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want Delete this task ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose} autoFocus>
+            Disagree
+          </Button>
+          <Button onClick={handleDeleteAgree}>Agree Delete It</Button>
+        </DialogActions>
+      </Dialog>
+     {/* ===deleteModal=== */}
+
+
     <Box sx={{ minWidth: 275 }}>
       <Card variant="outlined" style={{background:'', maxHeight:'80vh', overflow:'scroll', marginTop:'100px'}}>{card}</Card>
     </Box>
+    </>
   );
 }
