@@ -4,7 +4,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
 export default function CustomizedSnackbars({open, handleClose, message}) {
-  console.log('snackbarssssss', open)
+  // console.log('snackbarssssss', open)
   if (message ===null)
     return;
 

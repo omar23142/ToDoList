@@ -1,5 +1,6 @@
 
 import * as React from 'react';
+import {useReducer} from 'react'
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -13,7 +14,7 @@ import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import {useState, useContext, useMemo} from 'react';
 import completedSound from './checked.mp3';
-import { tasksContext } from '../context/tasksContext';
+import { tasksContext, ReducerProvider, useTasksProvider } from '../context/tasksContext';
 // import completedSound from './checked.mp3';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import OfflinePinIcon from '@mui/icons-material/OfflinePin';
@@ -24,16 +25,27 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import {barContext} from '../context/snackbarContext'
+import tasksReducer from '../Reducer/tasksReducer';
+
 
 
 export default function MainComponent() {
+
+ 
+
   let tasksArray = useContext(tasksContext);
-  // console.log('ggggggggggggg',tasksArray);
-  const [tasks, setTasks] = useState(tasksArray);
+  
+  let {tasks, dispatch} = useContext(ReducerProvider)
+  // let {tasks, dispatch} = useTasksProvider();
+  
+
+  // const [tasks1, setTasks] = useState(tasksArray);
   const [input, setInput] = useState('');
   const [shwedTasks, setShowedTasks] = React.useState('all');
 
   const [Deleteopen, setdeleteOpen] = React.useState(false);
+
+    // const [tasks, dispatch] = useReducer(tasksReducer, []);
 
   const handleDeleteClickOpen = (task) => {
     setTaskfromTaskCard(task);
@@ -44,12 +56,7 @@ export default function MainComponent() {
     setdeleteOpen(false);
   };
 
-  const handleDeleteAgree = () => {
-    console.log('in handleDeleteAgree',taskfromTaskCard)
-    handleDeleteClick(taskfromTaskCard.id)
-    setdeleteOpen(false);
-    handleEvent('task was deleted successfully')
-  };
+  
 
   const [taskfromTaskCard, setTaskfromTaskCard] = useState({});
   const [EditForm, setEditForm] = React.useState({EditOpenForm:false, title:taskfromTaskCard.title, detailes:taskfromTaskCard.detailes});
@@ -58,7 +65,7 @@ export default function MainComponent() {
   // console.log('Arraaaaaaaaaaay', handleEvent);
   //////////////////////////////////////////////////////////
     function handleEditOpen(task) {
-      console.log('tasssssskkkkk',task.id, task.title, task.detailes)
+      // console.log('tasssssskkkkk',task.id, task.title, task.detailes)
       setTaskfromTaskCard(task)
       setEditForm({EditOpenForm:true, title:task.title, detailes:task.detailes});
     }
@@ -67,17 +74,88 @@ export default function MainComponent() {
     }
     function handleSubmit(event) {
       event.preventDefault();
-      handleTaskEdit(taskfromTaskCard.id, EditForm.title, EditForm.detailes)
+      // handleTaskEdit(taskfromTaskCard.id, EditForm.title, EditForm.detailes)
+  //     let newTasks = tasks.map((task) => {
+  //     if(task.id === taskfromTaskCard.id)
+  //     return {...task, title:EditForm.title, detailes:EditForm.detailes}
+  //     return task;
+  // });
+  // setTasks(newTasks);
+  // localStorage.setItem("tasks", JSON.stringify(newTasks));
+  // console.log('hhhhhhhhh', newTasks)
+      dispatch({type:'edit', payload:{
+        EditForm,
+        taskfromTaskCard
+      }})
       setEditForm({...EditForm, EditOpenForm:false});
       handleEvent('task was edited successfully')
     }
 
+  function handleAddClick (e) {
+  // const newTask = {id:crypto.randomUUID(), title:input, detailes:'', isCompleted:false }
+  // let newtasks = [...tasks, newTask];
+  // console.log('newwww', newtasks)
+  // setTasks(newtasks);
+  // localStorage.setItem("tasks", JSON.stringify(newtasks));
+  dispatch({type:'addTask', payload:{input}})
+  setInput('')
+  handleEvent('task was added successfully')
+}
+function handleCompletedCheck(id) {
+  
+  // let sound= false;
+  // let message='task was un Cehecked successfully';
+  // console.log('hhhhhh', id)
+  // let newTasks = tasks.map((task)=> {
+  //   if(task.id === id)
+  //   {
+  //     console.log('ddddddd', task)
+  //     if(!task.isCompleted)
+  //       {sound=true;
+  //        message= 'task was cehecked successfully'
+  //       }
+  //    return {...task, isCompleted:!task.isCompleted}
+     
+  //   }
+  //   return task
+  // });
 
+  // setTasks( newTasks);
+
+  // handleEvent(message)
+  // localStorage.setItem("tasks", JSON.stringify(newTasks));
+  // if(sound === true){
+  //   // console.log('soundddddddd')
+  //   const audio = new Audio(completedSound);
+  //   audio.play();
+  //   sound = false;
+  // // console.log('fffff', sound)}
+  // }
+  dispatch({type:'checked', payload:{
+    id,
+    handleEvent
+  }})
+}  
 
   function handleShownclick(value){
     console.log('shownclick from parent', value)
     setShowedTasks(value);
   }
+
+  const handleDeleteAgree = () => {
+    console.log('in handleDeleteAgree',taskfromTaskCard)
+    // handleDeleteClick(taskfromTaskCard.id)
+    // let newTasks = tasks.filter((task)=>{
+    // return task.id !== taskfromTaskCard.id
+    // });
+    // setTasks(newTasks);
+    // localStorage.setItem("tasks", JSON.stringify(newTasks));
+    dispatch({type:'delete', payload:{
+      taskfromTaskCard
+    }})
+    setdeleteOpen(false);
+    handleEvent('task was deleted successfully')
+  };
 
 let completedTasks = useMemo(()=>{
   return tasks.filter((task) =>{
@@ -104,8 +182,6 @@ let tasksList = showedTasks.map((task)=>{
   return (
   <TaskCard key={task.id} title={task.title} detailes={task.detailes}
     task={task} handleCompletedCheck={handleCompletedCheck} 
-    handleDeleteClick={handleDeleteClick}
-    handleTaskEdit={handleTaskEdit}
     handleEditOpen={handleEditOpen}
     handleDeleteClickOpen={handleDeleteClickOpen}/>
     
@@ -113,63 +189,26 @@ let tasksList = showedTasks.map((task)=>{
 });
 
 
-function handleAddClick (e) {
-  const newTask = {id:crypto.randomUUID(), title:input, detailes:'', isCompleted:false }
-  let newtasks = [...tasks, newTask];
-  console.log('newwww', newtasks)
-  setTasks(newtasks);
-  localStorage.setItem("tasks", JSON.stringify(newtasks));
-  setInput('')
-  handleEvent('task was added successfully')
-}
-function handleCompletedCheck(id) {
-  let sound= false;
-  let message='task was un Cehecked successfully';
-  console.log('hhhhhh', id)
-  let newTasks = tasks.map((task)=> {
-    if(task.id === id)
-    {
-      if(!task.isCompleted)
-        {sound=true;
-         message= 'task was cehecked successfully'
-        }
-     return {...task, isCompleted:!task.isCompleted}
-     
-    }
-    return task
-  });
 
-  setTasks( newTasks);
+// function handleDeleteClick(id) {
+//   let newTasks = tasks.filter((task)=>{
+//     return task.id !== id 
+//   });
+//   setTasks(newTasks);
+//   localStorage.setItem("tasks", JSON.stringify(newTasks));
+// }
 
-  handleEvent(message)
-  localStorage.setItem("tasks", JSON.stringify(newTasks));
-  if(sound === true){
-    // console.log('soundddddddd')
-    const audio = new Audio(completedSound);
-    audio.play();
-    sound = false;
-  // console.log('fffff', sound)}
-  }
-}
-function handleDeleteClick(id) {
-  let newTasks = tasks.filter((task)=>{
-    return task.id !== id 
-  });
-  setTasks(newTasks);
-  localStorage.setItem("tasks", JSON.stringify(newTasks));
-}
-
-function handleTaskEdit(id,  newTitle='', newDetaile='') {
+// function handleTaskEdit(id,  newTitle='', newDetaile='') {
   
-  let newTasks = tasks.map((task) => {
-    if(task.id === id)
-      return {...task, title:newTitle, detailes:newDetaile}
-    return task;
-  });
-  setTasks(newTasks);
-  localStorage.setItem("tasks", JSON.stringify(newTasks));
-  console.log('hhhhhhhhh', newTasks)
-}
+//   let newTasks = tasks.map((task) => {
+//     if(task.id === id)
+//       return {...task, title:newTitle, detailes:newDetaile}
+//     return task;
+//   });
+//   setTasks(newTasks);
+//   localStorage.setItem("tasks", JSON.stringify(newTasks));
+//   console.log('hhhhhhhhh', newTasks)
+// }
 
 const card = (
   <React.Fragment>
@@ -214,11 +253,12 @@ const card = (
 
   React.useEffect(()=> {
     console.log('callling useEffect')
-    let localstorage = JSON.parse(localStorage.getItem('tasks'));
-    if (!localstorage)
-      localstorage=[];
-    // console.log('llllllllll', localstorage);
-    setTasks(localstorage)  
+    // let localstorage = JSON.parse(localStorage.getItem('tasks'));
+    // if (!localstorage)
+    //   localstorage=[];
+    // // console.log('llllllllll', localstorage);
+    // setTasks(localstorage)  
+    dispatch({type:'getLocalStorage'})
   }, []);
 
   

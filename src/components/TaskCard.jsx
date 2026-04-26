@@ -25,9 +25,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function TaskCard({title, detailes='', handleCompletedCheck, handleDeleteClick, handleTaskEdit, task, handleEditOpen, handleDeleteClickOpen}) {
+export default function TaskCard({title, detailes='', handleCompletedCheck, task, handleEditOpen, handleDeleteClickOpen}) {
 
-  // console.log('tttttttt', title, detailes)
+  // console.log('tttttttt', task.isCompleted, detailes)
 let done = task.isCompleted;
 // console.log('kkkkkk', done)
 

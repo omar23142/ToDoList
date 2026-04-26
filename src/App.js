@@ -6,25 +6,24 @@ import Container from '@mui/material/Container';
 import {tasksContext} from './context/tasksContext'
 import MainComponent from './components/MainComponent';
 import Snackbars from './components/Snackbar'
-import {useState} from 'react'
+import {useState, useReducer} from 'react'
 import {barContext} from './context/snackbarContext';
 import SnackbarProvider from './provider/snackbar.provider';
+import {TasksProvider} from './context/tasksContext';
+
 
 function App() {
   // console.log('fontttt', theme);
 
-  let tasks = [
-  {id:crypto.randomUUID(), title:'finish react course', detailes:'before end of month', isCompleted:false},
-  {id:crypto.randomUUID(), title:'finish react course', detailes:'before end of this month', isCompleted:false},
-  {id:crypto.randomUUID(), title:'finish my protofilo', detailes:'before end of may month', isCompleted:false},
-];
+
 
  
   // console.log('AAAAAAAAAAAAAAp', SnackbarProvider)
   return (
     
     <ThemeProvider theme = {theme} >
-      <tasksContext.Provider value= {tasks}>
+      {/* <tasksContext.Provider value= {tasks}> */}
+      <TasksProvider>
       <SnackbarProvider 
       >
         <div className="App" style={{display:'flex', justifyContent:'center', alignItems:'center', heigh:'100vh', background:'rgb(19, 31, 44)'}}>
@@ -34,7 +33,8 @@ function App() {
         </div>
         {/* <Snackbars open={open} handleClose={handleClose} message={open.message}/> */}
     </SnackbarProvider>
-    </tasksContext.Provider>
+    {/* </tasksContext.Provider> */}
+    </TasksProvider>
     
     </ThemeProvider >
     
